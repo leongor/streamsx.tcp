@@ -216,7 +216,7 @@ namespace mcts
 					}
 				}
 				else {
-					connPtr->shutdown_send_once(makeConnReadOnly_);
+					connPtr->shutdown_conn(makeConnReadOnly_);
 					errorHandler_.handleError(streams_boost::system::error_code(streams_boost::asio::error::would_block), ipAddress, port);
 				}
 

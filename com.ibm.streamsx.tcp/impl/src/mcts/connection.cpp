@@ -29,7 +29,8 @@ namespace mcts
           remoteIp_(""), // initialize with empty string
           blockSize_(blockSize),
           outFormat_(outFormat),
-          numOutstandingWrites_(0)
+          numOutstandingWrites_(0),
+          isShutdown_(false)
     {
         __sync_fetch_and_add(&numConnections_, 1);
     }
@@ -96,10 +97,19 @@ namespace mcts
                                                     streams_boost::asio::placeholders::bytes_transferred));
     }
 
-    bool TCPConnection::shutdown_send_once(bool makeConnReadOnly)
+    void TCPConnection::shutdown_conn(bool makeConnReadOnly)
     {
-    	static bool shutdown_send_op = shutdown_send(makeConnReadOnly);
-    	return shutdown_send_op;
+    	if(!isShutdown_) {
+    		isShutdown_ = true;
+    		streams_boost::system::error_code ec;
+			if(makeConnReadOnly){
+				socket_.shutdown(streams_boost::asio::ip::tcp::socket::shutdown_send, ec);
+			}
+			else {
+				socket_.cancel(ec);
+				socket_.shutdown(streams_boost::asio::ip::tcp::socket::shutdown_both, ec);
+			}
+    	}
     }
 
     void TCPConnection::handleRead(streams_boost::system::error_code const & e,
