@@ -38,16 +38,12 @@ namespace mcts
     TCPConnection::~TCPConnection()
     {
         __sync_fetch_and_sub(&numConnections_, 1);   
-        if (remoteIp_.size() == 0){
+        if (remoteIp_.size() == 0) {
             infoHandler_.handleInfo("rejected",
             						socket_.remote_endpoint().address().to_string(),
             						socket_.remote_endpoint().port());
-        }else{
-//			#if (((STREAMS_BOOST_VERSION / 100) % 1000) < 53)
-//				streams_boost::mutex::scoped_lock scoped_lock(mutex_);
-//			#else
-//				streams_boost::unique_lock<streams_boost::mutex> scoped_lock(mutex_);
-//			#endif
+        }
+        else {
 
             dataItem_.flushData(TCPConnection::outFormat_);
             if (dataItem_.hasCompleteItems()) {
@@ -55,7 +51,6 @@ namespace mcts
                 dataItem_.removeCompleteItems();
             } 
             infoHandler_.handleInfo("disconnected", remoteIp_, remotePort_);
-
         }
     }
 
